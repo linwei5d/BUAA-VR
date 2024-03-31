@@ -9,3 +9,4 @@ Packages/
 *.unityproj
 *.DS_Store
 *.csproj
+*.log
