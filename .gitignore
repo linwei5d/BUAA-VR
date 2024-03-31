@@ -5,8 +5,8 @@ Logs/
 UserSettings/
 Packages/
 *.sln
+*.csproj
 *.userprefs
 *.unityproj
 *.DS_Store
-*.csproj
 *.log
