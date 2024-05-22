@@ -20,7 +20,7 @@ using UnityEngine.XR.Interaction.Toolkit;
 
 namespace PicoMRTK3Support.Runtime
 {
-    [Obsolete("Deprecated", true)]
+    //[Obsolete("Deprecated", true)]
     public class PicoMRTKHandVisualizer : MonoBehaviour
     {
         [SerializeField] [Tooltip("The XRNode on which this hand is located.")]
@@ -212,15 +212,41 @@ namespace PicoMRTK3Support.Runtime
                         continue;
                     }
 
-                    if (i == (int) HandJoint.JointThumbMetacarpal)
+                    if (i == (int) HandJoint.JointWrist)
                     {
-                        Debug.Log(
-                            $"JointThumbMetacarpal Rotation:{handJointLocations.jointLocations[i].pose.Orientation.ToQuat()}");
+                        //Debug.Log(
+                        //   $"JointThumbMetacarpal Rotation:{handJointLocations.jointLocations[i].pose.Orientation.ToQuat()}");
+
+                        riggedVisualJointsArray[i].localPosition =
+                            handJointLocations.jointLocations[i].pose.Position.ToVector3();
+                        riggedVisualJointsArray[i].localRotation =
+                                              handJointLocations.jointLocations[i].pose.Orientation.ToQuat();
                     }
 
-                    riggedVisualJointsArray[i].localRotation =
-                        handJointLocations.jointLocations[i].pose.Orientation.ToQuat();
-                }
+                    else
+                    {
+                        //riggedVisualJointsArray[i].localRotation =
+                        //    handJointLocations.jointLocations[i].pose.Orientation.ToQuat();
+                        UnityEngine.Pose parentPose = UnityEngine.Pose.identity;
+
+                        if (i == (int)HandJoint.JointPalm ||
+                            i == (int)HandJoint.JointThumbMetacarpal ||
+                            i == (int)HandJoint.JointIndexMetacarpal ||
+                            i == (int)HandJoint.JointMiddleMetacarpal ||
+                            i == (int)HandJoint.JointRingMetacarpal ||
+                            i == (int)HandJoint.JointLittleMetacarpal)
+                        {
+                            parentPose = new UnityEngine.Pose(handJointLocations.jointLocations[1].pose.Position.ToVector3(), handJointLocations.jointLocations[1].pose.Orientation.ToQuat());
+                        }
+                        else
+                        {
+                            parentPose = new UnityEngine.Pose(handJointLocations.jointLocations[i - 1].pose.Position.ToVector3(), handJointLocations.jointLocations[i - 1].pose.Orientation.ToQuat());
+                        }
+
+                        var inverseParentRotation = Quaternion.Inverse(parentPose.rotation);
+                        riggedVisualJointsArray[i].localRotation = inverseParentRotation * handJointLocations.jointLocations[i].pose.Orientation.ToQuat();
+                    }
+               }
             }
 
             // Update the hand material based on selectedness value
